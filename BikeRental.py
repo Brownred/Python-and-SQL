@@ -1,20 +1,22 @@
 import datetime
-#Inorder to connect to a PostgreSQL database instance use the psycopg2 library
 import psycopg2
+#Inorder to connect to a PostgreSQL database instance use the psycopg2 library
 
 class customer_info:
-    def __init__(self, ID, fisrt_Name, Last_name, Address, Contact_info, Age:int):
+    def __init__(self, ID, Fisrt_Name, Last_name, Age, Gender, Phone_no, email, Location):
         
         """
         Our constructor method which allows for saving of individual customer infomation to a csv file, "Bike_rental_Customer_info.csv"
         """
         
         self.ID = ID
-        self.first_name = fisrt_Name
+        self.First_name = Fisrt_Name
         self.Last_name = Last_name
-        self.Address = Address
-        self.contact_info = Contact_info
+        self.Gender = Gender
+        self.Phone_no = Phone_no
         self.Age = Age
+        self.email = email
+        self.Location = Location
         
         # Creating a connection object
         conn = psycopg2.connect(database = "BikeRentalsDatabase",
@@ -26,11 +28,17 @@ class customer_info:
         # creating a Cusor object to help execute queries
         self.cursor = conn.cursor()
         
-        # Insert the customer details into the databse
-        self.cursor.execute("INSERT INTO Customer_Data (Name,address) VALUES (%s,%s)",(self.first_name, self.Address))
+        # Insert the customer details into the databse by passing the data to fill the placeholders
+        try:
+            self.cursor.execute("INSERT INTO customer (First_name, Last_name, Age, Gender, Phone_no, email, Location) VALUES (%s,%s,%s,%s,%s,%s,%s)",
+                            (self.First_name, self.Last_name, self.Age, self.Gender, self.Phone_no, self.email, self.Location))
+        except:
+            print("Some Wrong value has been Input")
+        else:
+            #make changes to the database persistent
+            conn.commit()
         
-
-class BikeRental:
+class BikeRental():
     def __init__(self, stock=int(100)):
         """
         constructor class that instantiates bike rental shop.
@@ -62,9 +70,10 @@ class BikeRental:
 
         if now:   
             self._rentalTime = now
+            return self._rentalTime
         else:
             self._rentalTime = 1
-        #return now
+            return self._rentalTime
     
     def _rentBikeOnDailyBasis(self, n):
         """
@@ -80,9 +89,10 @@ class BikeRental:
             
         if now:   
             self._rentalTime = now
+            return self._rentalTime
         else:
             self._rentalTime = 1
-        #return now
+            return self._rentalTime
         
     def _rentBikeOnWeeklyBasis(self, n):
         """
@@ -98,9 +108,10 @@ class BikeRental:
 
         if now:   
             self._rentalTime = now
+            return self._rentalTime
         else:
             self._rentalTime = 1
-        #return now
+            return self._rentalTime
         
     def returnBike(self, request):
         """
@@ -119,22 +130,58 @@ class BikeRental:
             now = datetime.datetime.now()
             rentalPeriod = now - rentalTime
             
-            # hourly bill calculation
-            if rentalBasis == 1:
-                bill = round(rentalPeriod.seconds /3600) * 5 * numOfBikes
-            
-            # daily bill calculation
-            elif rentalBasis == 2:
-                bill = round(rentalPeriod.days) * 20 * numOfBikes
-                
-            # weekly bill calculation
-            elif rentalBasis == 2:
-                bill = round(rentalPeriod.days /7) * 60 * numOfBikes
-                
+            match rentalBasis:
+                # hourly bill calculation
+                case 1:
+                    bill = round(rentalPeriod.seconds /3600) * 5 * numOfBikes
+                    # if bike was rented for less than an hour
+                    if bill == 0:
+                        bill = 5
+                        
+                # daily bill calculation
+                case 2:
+                    bill = round(rentalPeriod.days) * 20 * numOfBikes
+                    # if bike was rented for less than an day period
+                    if bill == 0:
+                        bill = 10
+                        
+                # weekly bill calculation
+                case 3:
+                    bill = round(rentalPeriod.days /7) * 60 * numOfBikes
+                    # if bike was rented for less than an week period
+                    if bill == 0:
+                        bill = 60
+                    
             # family discount calculation
             if (3 <= numOfBikes <= 5):
                 print("You are eligible for family rental promotion of 30% discount")
                 bill = bill * 0.7
+            
+            name = input("Enter Last_name only again \n")
+            bike_Condition = input("What is(are) the condition(s) of the bikes? \n")
+        
+            # Creating a connection object
+            conn = psycopg2.connect(database = "BikeRentalsDatabase",
+                        host = "127.0.0.1",
+                        user = "postgres",
+                        password = "denji",
+                        port = "5432")
+            
+            # creating a Cusor object to help execute queries "Insert requested info from customers"
+            cursor = conn.cursor()
+        
+            # Since id are auto generated, search for the customer id based on their last name and return it   
+            cursor.execute("SELECT customer_id FROM customer WHERE Last_name = %s;", (name,))
+            ID = cursor.fetchone()[0]
+            
+            try: 
+                cursor.execute("INSERT INTO Bikereturns VALUES (%s, %s, %s, %s, %s, %s)", (ID, rentalTime, now, rentalPeriod, bill, bike_Condition))
+            except:
+                raise
+                print("Some Wrong value has been Input")
+            else:
+                #make changes to the database persistent
+                conn.commit()
                 
             print("Thanks for returning your bike. Hope you enjoyed our services!")
             print(f"That would be ${bill}")
@@ -145,6 +192,8 @@ class BikeRental:
             return None
     
 class customer(BikeRental, customer_info):
+    """ remember to add some doc here
+        """
     def __init__(self):
         #Add a custom exception to prevent any usage of this or any class before customer info is entered, Only allows for bike retrun
         
@@ -152,7 +201,7 @@ class customer(BikeRental, customer_info):
         Our constructor method which instantiates various customer objects.
         """
 
-        super().__init__(self)
+        #customer_info().__init__(self)
         
         self._bikes = 0
         self._rentalBasis = 0
@@ -163,8 +212,9 @@ class customer(BikeRental, customer_info):
         """
         Takes a request from the customer for the number of bikes.
         """
-        
-        
+        name = input("Enter Last_name only again \n")
+        bike_Condition = input("What is(are) the condition(s) of the bikes? \n")
+    
         # implement a logic for invalid input
         try:
             self._bikes = int(input("How many bikes would you like to rent: "))
@@ -187,34 +237,52 @@ class customer(BikeRental, customer_info):
             
             match rental_basis:
                 case 1:
-                    BikeRental()._rentBikeOnHourlyBasis(self._bikes)
+                    self._rentalTime = BikeRental()._rentBikeOnHourlyBasis(self._bikes)
                     self._rentalBasis = 1
-                    print("Your Have chosen hourly rental basis")
+                    
                 case 2:
-                    BikeRental()._rentBikeOnDailyBasis(self._bikes)
+                    self._rentalTime = BikeRental()._rentBikeOnDailyBasis(self._bikes)
                     self._rentalBasis = 2
-                    print("Your Have chosen daily rental basis")
+                    
                 case 3:
-                    BikeRental()._rentBikeOnWeeklyBasis(self._bikes)
+                    self._rentalTime = BikeRental()._rentBikeOnWeeklyBasis(self._bikes)
                     self._rentalBasis = 3
-                    print("Your Have chosen weekly rental basis")
+                    
 
+            # Creating a connection object
+            conn = psycopg2.connect(database = "BikeRentalsDatabase",
+                        host = "127.0.0.1",
+                        user = "postgres",
+                        password = "denji",
+                        port = "5432")
             
-            # Brush up on this
-            self.cursor.execute("INSERT INTO Customer_Data (Name,address) VALUES (%s,%s)",(self._rentalBasis, self._bikes))
+            # creating a Cusor object to help execute queries "Insert requested info from customers"
+            cursor = conn.cursor()
         
+            # Since id are auto generated, search for the customer id based on their last name and return it   
+            cursor.execute("SELECT customer_id FROM customer WHERE Last_name = %s;", (name,))
+            ID = cursor.fetchone()[0]
+            
+            try: 
+                cursor.execute("INSERT INTO Rentals VALUES (%s, %s, %s, %s, %s)", (ID, self._bikes, self._rentalBasis, self._rentalTime, bike_Condition))
+            except:
+                print("Some Wrong value has been Input")
+            else:
+                #make changes to the database persistent
+                conn.commit()
+            
     def returnBike(self):
         """
         Allows customers to return their bikes to rental shop.
         """
+  #--->> !! THis method should be independent of rentBike method
         
         if self._rentalBasis and self._rentalTime and self._bikes:
-            super().returnBike((self._rentalTime, self._rentalBasis, self._bikes))
+            BikeRental().returnBike((self._rentalTime, self._rentalBasis, self._bikes))
             #return (self._rentalTime, self._rentalBasis, self._bikes)
         else:
             #Id = int(input("Input Customer's ID"))
             #Search for the customers id in rental information if none ...
             return self._rentalTime, self._rentalBasis, self._bikes
 
-# Error Self._bikes not setting itself to desired values,, check why
 
