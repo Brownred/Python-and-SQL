@@ -1,5 +1,7 @@
 /* Customer table that stores customer's personal information */
 
+-- Table structure for table 'category'
+
 CREATE TABLE Customer (
 	customer_id SERIAL PRIMARY KEY, --autogenerate customer id
 	First_name VARCHAR(30) NOT NULL,
@@ -19,8 +21,9 @@ ADD CONSTRAINT Age CHECK (age >= 18);
 ALTER TABLE Customer
 ADD CONSTRAINT Phone_no UNIQUE (Phone_no);
 
+-- -------------------------------------------------------------------
 
--- Create Rentals table
+-- Table structure for table 'Rentals'
 
 /* Rentals table contains both pending and returned bikes from customer.
 	All columns to cantain NOT NULL constraint*/
@@ -38,7 +41,9 @@ CREATE TABLE Rentals (
 ALTER TABLE Rentals ADD CONSTRAINT customer_id
 FOREIGN KEY (customer_id) REFERENCES Customer ON DELETE CASCADE;
 
--- Create bikeReturns table
+-- ----------------------------------------------------------------------
+
+-- Table structure for table 'bikeReturns'
 
 /* The bikeReturns table to only contain the records of customers that have returned bikes.
 	.... */
@@ -52,9 +57,10 @@ CREATE TABLE bikeReturns (
 	Bike_condition VARCHAR(10) NOT NULL
 	);
 	
-	
+-- -------------------------------------------------------
+
 /* Test the correctness of the customer table created by adding some data to it
-* ...
+*  Damping data for table 'customer'
 */
 INSERT INTO customer (First_name, Last_name, Age, Gender, Phone_no, email, Location) 
 VALUES 
