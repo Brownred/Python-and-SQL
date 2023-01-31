@@ -12,17 +12,28 @@ class Connect():
         """
         try:
             self.connection = psycopg2.connect(**database_info) 
-            print("Connection succesfull!")
+            print("Connection to database succesfull!")
             return self.connection
         
         except: # Catch all exceptions
             print("Could not connect to Database! An invalid argument maybe placed!")
-            
-    def __exit__(self):
+    
+    # Perform cleanup actions        
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+            if exc_type is not None:
+                self.connection.rollback()
+            else:
+                # Make changes to the database persistent
+                self.connection.commit()
             self.connection.close()
             self.connection = None
+            return True
             
-    
+# Test that the database connection context manager works effectively   
 if __name__ == "__main__":
     with Connect() as conn:
         print("Succesful!!")
+        curs = conn.cursor()
+        curs.execute("""SELECT UPPER('lenox miheso');""")
+        print(curs.fetchall())
+        

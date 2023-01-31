@@ -3,13 +3,13 @@ from BikeRentals.db_connection import Connect
 
 
 class customer_info:
-    def __init__(self, ID, Fisrt_Name, Last_name, Age, Gender, Phone_no, email, Location):
+    def __init__(self, Fisrt_Name: str, Last_name: str, Age: int, Gender: str, Phone_no: int, email: str, Location: str):
         
         """
         Our constructor method which allows for saving of individual customer infomation to a csv file, "Bike_rental_Customer_info.csv"
         """
         
-        self.ID = ID
+        #self.ID = ID
         self.First_name = Fisrt_Name
         self.Last_name = Last_name
         self.Gender = Gender
@@ -18,22 +18,23 @@ class customer_info:
         self.email = email
         self.Location = Location
 
-        with Connect as conn:
+    # save customer information into database
+    def commit_info(self):
+        
+        with Connect() as conn:
             self.cursor = conn.cursor()
             
             # Insert the customer details into the databse by passing the data to fill the placeholders
             try:
                 self.cursor.execute("INSERT INTO customer (First_name, Last_name, Age, Gender, Phone_no, email, Location) VALUES (%s,%s,%s,%s,%s,%s,%s)",
                                 (self.First_name, self.Last_name, self.Age, self.Gender, self.Phone_no, self.email, self.Location))
+                print("Customer details has been setup. Proceed to rentals!")
             except:
                 print("Some Wrong value has been Input")
-            else:
-                #make changes to the database persistent
-                conn.commit()
                 
         
 class BikeRental():
-    def __init__(self, stock=0):
+    def set_stock(self, stock=0):
         """
         constructor class that instantiates bike rental shop.
         """
@@ -165,7 +166,6 @@ class customer(BikeRental, customer_info):
     """ remember to add some doc here
         """
     def __init__(self):
-        super().__init__(stock = 10)
         #Add a custom exception to prevent any usage of this or any class before customer info is entered, Only allows for bike retrun
         
         """
