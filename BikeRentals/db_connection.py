@@ -1,6 +1,6 @@
 # Inorder to connect to a PostgreSQL database instance use the psycopg2 library
 import psycopg2
-from BikeRentals.constants import database_info
+from constants import database_info
 
 # Use a context manager to help with clean up actions on the database
 class Connect():
@@ -27,7 +27,7 @@ class Connect():
                 self.connection.commit()
             self.connection.close()
             self.connection = None
-            return True
+            return False
             
 # Test that the database connection context manager works effectively   
 if __name__ == "__main__":

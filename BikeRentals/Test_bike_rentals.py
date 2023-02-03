@@ -1,63 +1,32 @@
 import unittest
 from datetime import datetime, timedelta
-from BikeRentals.bike_rentals import BikeRental, customer_info, customer
-from BikeRentals.constants import database_info
-from BikeRentals.db_connection import Connect
-
-class TestDatabaseConnection(unittest.TestCase):
-    def test_create_table(self):
-        with Connect() as conn:
-            cursor = conn.cursor()
-            cursor.execute("CREATE TABLE test_table (id serial PRIMARY KEY, name VARCHAR(20));")
-            conn.commit()
-            cursor.execute("SELECT * FROM information_schema.tables WHERE table_name = 'test_table';")
-            result = cursor.fetchone()
-            cursor.close()
-            self.assertIsNotNone(result)
-            
-    def test_insert_data(self):
-        with Connect() as conn:
-            cursor = conn.connect()
-            cursor.execute("INSERT INTO test_table (name) VALUES ('Jon Doe');")
-            conn.commit()
-            cursor.execute("SELECT * FROM test_table WHERE name='Jon Doe';")
-            result = cursor.fetchone()
-            cursor.close()
-            self.assertIsNotNone(result)
-            
-    def test_update_data(self):
-        with Connect() as conn:
-            cursor = conn.connect()
-            cursor.execute("UPDATE test_table SET name='Jane Doe' WHERE name='Jon Doe';")
-            conn.commit()
-            cursor.execute("SELECT * FROM test_table WHERE name='Jane Doe';")
-            result = cursor.fetchone()
-            cursor.close()
-            self.assertIsNotNone(result)
-            
-    def test_delete_data(self):
-        with Connect() as conn:
-            cursor = conn.connect()
-            cursor.execute("DELETE FROM test_table WHERE name='Jane Doe';")
-            conn.commit()
-            cursor.execute("SELECT * FROM test_table WHERE name='Jane Doe';")
-            result = cursor.fetchone()
-            cursor.close()
-            self.assertIsNone(result)
-    
-    def test_drop_table(self):
-        with Connect() as conn:
-            cursor = conn.cursor()
-            cursor.execute("DROP TABLE test_table;")
-            conn.commit()
-            cursor.execute("SELECT * FROM information_schema.tables WHERE table_name = 'test_table';")
-            result = cursor.fetchone()
-            cursor.close()
-            self.assertIsNone(result)
-            
+from bike_rentals import BikeRental, customer_info, customer
+from db_connection import Connect
             
 class TestCustomer_info(unittest.TestCase):
-    pass
+    def setUp(self):
+        # Change Details to prevent getting a referential integrity error
+        self.customer1 = customer_info('Lenox', 'Miheso', 20, 'Male', 113712798, 'lenox@xyz.com', 'Kenya')
+    
+    def test_commit_info(self):
+        self.customer1.commit_info()
+        with Connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT First_name FROM customer WHERE Phone_no=%s;",(self.customer1.Phone_no,))
+            result = cursor.fetchone()
+            cursor.close()
+            self.assertIsNotNone(result)
+            
+    def test_delete_record(self):
+        self.customer1.delete_info()
+        with Connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT First_name FROM customer WHERE First_name=%s;",(self.customer1.First_name,))
+            result = cursor.fetchone()
+            cursor.close()
+            self.assertIsNone(result)
+                
+        
 class TestBikeRental(unittest.TestCase):
     def setUp(self):
         self.shop1 = BikeRental()

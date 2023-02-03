@@ -1,10 +1,9 @@
 import unittest
 import sys
-sys.path.append('..')
+# sys.path.append('..')
+
 
 from db_connection import Connect
-
-# from BikeRentals.db_connection import Connect
 
 class TestDatabaseConnection(unittest.TestCase):
     def test_create_table(self):

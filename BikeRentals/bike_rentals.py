@@ -1,5 +1,5 @@
 import datetime
-from BikeRentals.db_connection import Connect
+from db_connection import Connect
 
 
 class customer_info:
@@ -22,16 +22,20 @@ class customer_info:
     def commit_info(self):
         
         with Connect() as conn:
-            self.cursor = conn.cursor()
+            cursor = conn.cursor()
             
             # Insert the customer details into the databse by passing the data to fill the placeholders
-            try:
-                self.cursor.execute("INSERT INTO customer (First_name, Last_name, Age, Gender, Phone_no, email, Location) VALUES (%s,%s,%s,%s,%s,%s,%s)",
+            cursor.execute("INSERT INTO customer (First_name, Last_name, Age, Gender, Phone_no, email, Location) VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                 (self.First_name, self.Last_name, self.Age, self.Gender, self.Phone_no, self.email, self.Location))
-                print("Customer details has been setup. Proceed to rentals!")
-            except:
-                print("Some Wrong value has been Input")
-                
+            print("Customer details has been setup. Proceed to rentals!")
+        #    print("Some Wrong value has been Input")
+    
+    def delete_info(self):
+        
+        with Connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM customer WHERE First_name=%s;",(self.First_name,))
+            print("successfully Deleted record!")     
         
 class BikeRental():
     def set_stock(self, stock=0):
