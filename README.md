@@ -1,6 +1,6 @@
 # Bike Rentals
 
-![Bike Rentals](https://images.app.goo.gl/HnPpwkZy8j5zhJ1X9)
+![Bike Rentals](https://www.google.com/url?sa=i&url=https%3A%2F%2Fmissionzero.sheridancollege.ca%2Ftransportation%2Fbikehub%2Fbike-rentals%2F&psig=AOvVaw2wnuGWQtOUfsB7sxVOcXpY&ust=1675614440259000&source=images&cd=vfe&ved=0CA0QjRxqFwoTCPDTzLik_PwCFQAAAAAdAAAAABAD)
 
 Bike Rentals is a python project that allows users to rent bikes on an hourly, daily, or weekly basis. With hourly rentals priced at $5, daily rentals at $20, and weekly rentals at $60, it provides an affordable and convenient way to enjoy the outdoor.
 
